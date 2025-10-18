@@ -1,0 +1,23 @@
+:host {
+    display: block;
+    flex-grow: 1;
+
+    --border-radius: 40px;
+    --border-width: 3px;
+    --border-color: rgba(241, 225, 225, 0.993);
+
+    --msg-input-padding: 25px
+}
+
+#input-container {
+    height: 100%;
+    display: block;
+}
+
+#msg_input {
+    width: 100%;
+}
+
+#msg_input:focus {
+    outline: none;
+}

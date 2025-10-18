@@ -1,0 +1,37 @@
+:host {
+    will-change: transform, opacity;
+    display: block;
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
+
+.enter-animation {
+    animation: slide-fade-from-right 0.3s cubic-bezier(.22,.9,.35,1) both;
+}
+
+@keyframes slide-fade-from-right {
+    from {    
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {    
+        opacity: 1;    
+        transform: translateX(0);
+    }
+}
+
+.leave-animation {
+    animation: slide-fade-to-left 0.3s cubic-bezier(.22,.9,.35,1);
+}
+
+@keyframes slide-fade-to-left {
+    from {
+        opacity: 1;
+        transform: translateX(0);  
+    }
+    to {    
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}

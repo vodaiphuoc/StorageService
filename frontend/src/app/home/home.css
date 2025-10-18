@@ -1,0 +1,49 @@
+:host{display:block}
+/* minimal overrides so component is self-contained */
+.container{max-width:1100px;margin:0 auto;padding:1rem}
+.brand{font-weight:700;font-size:1.125rem;color:#0f1724;text-decoration:none}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.nav-links{display:flex;gap:1rem;align-items:center}
+.nav-links a{text-decoration:none;color:#6b7280}
+.nav-toggle{display:none;background:none;border:0;font-size:1.2rem}
+
+.hero{padding:4rem 0}
+.hero-inner{display:flex;gap:2rem;align-items:center}
+.hero-copy{flex:1}
+.hero-image{flex:1;display:flex;justify-content:center}
+.hero h1{font-size:2.25rem;margin:0 0 0.5rem}
+.lead{color:#6b7280;margin-bottom:1rem}
+.hero-cta{display:flex;gap:.75rem}
+.mock-card{
+    width:320px;
+    height:220px;
+    border-radius:12px;
+    background:linear-gradient(180deg,#fff,#f6fbfb);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#6b7280;
+    box-shadow:0 6px 18px rgba(13, 14, 51, 0.926)
+}
+
+.grid{display:grid;gap:1rem}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.card{background:white;padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
+.pricing-card{background:white;padding:1.25rem;border-radius:12px;text-align:center}
+.pricing-card.popular{transform:translateY(-6px);box-shadow:0 12px 32px rgba(16,24,40,0.08)}
+
+
+
+.footer{padding:1rem 0;color:var(--muted)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center}
+
+@media (max-width:900px){
+  .hero-inner{flex-direction:column}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:600px){
+  .grid-3{grid-template-columns:1fr}
+  .nav-links{position:absolute;right:1rem;top:64px;flex-direction:column;background:white;padding:1rem;border-radius:8px;display:none}
+  .nav-links.open{display:flex}
+  .nav-toggle{display:block}
+}

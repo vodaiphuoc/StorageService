@@ -1,0 +1,254 @@
+<div class="flex min-h-full w-full flex-col justify-center px-6 lg:px-8">
+    <h2 class="mx-5 text-center text-2xl/9 font-bold tracking-tight text-black">Create new account</h2>
+    <div class="
+            mt-2
+            mb-10
+            p-5 
+            sm:mx-auto 
+            sm:w-full 
+            sm:max-w-sm
+            rounded-lg 
+            bg-[image:var(--authen-background)]
+            shadow-[var(--authen-shadow)]
+        ">
+
+        <form 
+            [formGroup]="registerForm"
+            (ngSubmit)="onSubmit()"
+            class="space-y-6"
+            >
+            <div>
+                <label 
+                    for="full-name" 
+                    class="block text-sm/6 font-medium text-black-100"
+                    >
+                    Your full name
+                </label>
+                <div class="mt-2">
+                    <input 
+                        id="full-name" 
+                        type="text" 
+                        formControlName="fullName"
+                        class="
+                            block 
+                            w-full
+                            h-(--input-field-height)
+                            rounded-md 
+                            bg-white
+                            px-3 py-1.5 
+                            text-base 
+                            text-black 
+                            outline-1 -outline-offset-1 outline-white/10 
+                            placeholder:text-gray-500 
+                            focus:outline-2 
+                            focus:-outline-offset-2 
+                            focus:outline-indigo-500 sm:text-sm/6
+                            " 
+                    />
+                </div>
+                <div class="text-red-500 text-sm mt-1">
+                    @if (fullName.invalid && (fullName.dirty || fullName.touched)) {
+                        @if (fullName.hasError('required')) {
+                            <div>Full name is required</div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm/6 font-medium text-black-100">Email address</label>
+                <div class="mt-2">
+                    <input 
+                        id="email" 
+                        type="email" 
+                        formControlName="email"
+                        placeholder="phuoc@gmail.com"
+                        class="
+                            block 
+                            w-full
+                            h-(--input-field-height)
+                            rounded-md 
+                            bg-white
+                            px-3 py-1.5 
+                            text-base 
+                            text-black
+                            outline-1 -outline-offset-1 outline-white/10 
+                            placeholder:text-gray-500 
+                            focus:outline-2 
+                            focus:-outline-offset-2 
+                            focus:outline-indigo-500 sm:text-sm/6
+                            " 
+                    />
+                </div>
+                <div class="text-red-500 text-sm mt-1">
+                    @if (email.invalid && (email.dirty || email.touched)) {
+                        @if (email.hasError('required')) {
+                            <div>Email is required</div>
+                        }
+
+                        @if (email.hasError('pattern')) {
+                            <div>Email must contains has '@'</div>
+                        }
+                    }
+                </div>
+            </div>
+    
+            <div>
+                <label for="password" class="block text-sm/6 font-medium text-black-100">Password</label>
+                <div class="mt-2">
+                    <input 
+                        id="password" 
+                        type="password"
+                        formControlName="password"
+                        class="
+                            block 
+                            w-full
+                            h-(--input-field-height)
+                            rounded-md 
+                            bg-white
+                            px-3 
+                            py-1.5 
+                            text-base 
+                            text-black
+                            outline-1 -outline-offset-1 
+                            outline-white/10 
+                            placeholder:text-gray-500 
+                            focus:outline-2 
+                            focus:-outline-offset-2 
+                            focus:outline-indigo-500 
+                            sm:text-sm/6
+                            "
+                        #pwdOverlayOrigin
+                    />
+                </div>
+
+                <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="pwdOverlayOrigin"
+                    [cdkConnectedOverlayOpen]="password.invalid && (password.dirty || password.touched)"
+                    [cdkConnectedOverlayPositions]="pwdOverlayPositions"
+                    [cdkConnectedOverlayGrowAfterOpen]="true"
+                    [cdkConnectedOverlayFlexibleDimensions]="true"
+                    (detach)="password.valid"
+                >
+                    <div 
+                        id="overlay-password" 
+                        class="
+                            text-red-500 
+                            text-sm
+                            mt-1
+                            p-2
+                            rounded-lg
+                        "
+                        >
+                        @if (password.hasError('required')) {
+                            <div>Password is required</div>
+                        }
+                        @if (password.hasError('minlength')) {
+                            <div>Required at least {{ password.getError('minlength').requiredLength }} characters</div>
+                        }
+
+                        @if (password.hasError('passwordStrength')) {
+                            Password must contain:
+                            <ul class="list-disc mx-5">
+                                @if (!password.getError('passwordStrength').hasUpperCase) {
+                                    <li>An uppercase letter</li>
+                                } 
+                                @if (!password.getError('passwordStrength').hasLowerCase) {
+                                    <li>A lowercase letter</li>
+                                }
+                                @if (!password.getError('passwordStrength').hasNumeric) {
+                                    <li>A number</li>
+                                }
+                                @if (!password.getError('passwordStrength').hasSpecial) {
+                                    <li>A special character</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </ng-template>
+
+            </div>
+
+            <div>
+                <label for="repeat-password" class="block text-sm/6 font-medium text-black-100">Re-type your password</label>
+                <div class="mt-2">
+                    <input 
+                        id="repeat-password" 
+                        type="password" 
+                        name="repeat-password"
+                        formControlName="repeatPassword"
+                        class="
+                            block
+                            w-full
+                            h-(--input-field-height)
+                            rounded-md 
+                            bg-white
+                            px-3 
+                            py-1.5 
+                            text-base 
+                            text-black
+                            outline-1 -outline-offset-1 
+                            outline-white/10 
+                            placeholder:text-gray-500 
+                            focus:outline-2 
+                            focus:-outline-offset-2 
+                            focus:outline-indigo-500 
+                            sm:text-sm/6
+                            " 
+                    />
+                </div>
+                <div class="text-red-500 text-sm mt-1">
+                    @if (registerForm.hasError('notMatchPwd')) {
+                        <div>Not match above password</div>
+                    }
+                </div>
+            </div>
+    
+            <div>
+                <button 
+                    type="submit"
+                    [class.cursor-not-allowed]="registerForm.invalid"
+                    class="
+                        flex 
+                        w-full 
+                        justify-center 
+                        rounded-md
+                        bg-indigo-500 
+                        px-3
+                        py-1.5
+                        text-sm/6 
+                        font-semibold 
+                        text-black
+                        hover:bg-indigo-400 
+                        focus-visible:outline-2 
+                        focus-visible:outline-offset-2 
+                        focus-visible:outline-indigo-500"
+                    >
+                    Register
+                </button>
+            </div>
+        </form>
+  
+        <p class="mt-5 text-center text-sm/6 text-dark-400">
+            Already have account?
+            <button
+                (click)="showLogin.emit()"
+                class="
+                    px-3
+                    py-1.5
+                    mx-3
+                    bg-red-400 
+                    text-white
+                    rounded-full 
+                    shadow-md
+                    opacity-50
+                    hover:opacity-100 
+                    transition-opacity 
+                    duration-300"
+            >
+                Login instead
+            </button>
+        </p>
+    </div>
+</div>

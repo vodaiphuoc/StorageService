@@ -1,0 +1,20 @@
+<button matButton [matMenuTriggerFor]="menu">
+    <mat-icon svgIcon="add-file-menu"></mat-icon>
+</button>
+<mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="openFileDialog($event)">
+        <mat-icon svgIcon="add-file-icon"></mat-icon>
+        <span>Attach file</span>
+        <input 
+            #file_input
+            type="file"
+            (change)="onFileSelected($event)" 
+            class="sr-only"
+        />
+    </button>
+
+    <button mat-menu-item>
+        <mat-icon svgIcon="add-image-icon"></mat-icon>
+        <span>Select image</span>
+    </button>
+</mat-menu>

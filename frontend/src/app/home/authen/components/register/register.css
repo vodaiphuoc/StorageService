@@ -1,0 +1,16 @@
+:host {
+    --authen-background: linear-gradient(180deg,#aface2,#79e2e2);
+    --authen-shadow: 0 6px 18px rgba(13, 14, 51, 0.926);
+    display: block;
+    position: absolute;
+    width: 100%;
+
+
+    overflow: visible;
+
+    --input-field-height: 40px;
+}
+
+#overlay-password {
+    background: linear-gradient(180deg,#dad9ec,#c2f2f2);
+}

@@ -1,0 +1,18 @@
+<div class="sm:mx-auto sm:w-full sm:max-w-sm py-3">
+    <img src="favicon.png" alt="Your Company" class="m-auto h-10 w-auto" />
+</div>
+<div>
+    @if (shouldShowLogin()) {
+        <app-login 
+            (showRegister)=setShowLoginFromChildComponents(false) 
+            animate.enter="enter-animation"
+            animate.leave="leave-animation"
+        />
+    } @else {
+        <app-register 
+            (showLogin)=setShowLoginFromChildComponents(true)
+            animate.enter="enter-animation"
+            animate.leave="leave-animation"
+        />
+    }
+</div>

@@ -1,0 +1,32 @@
+<button matFab extended [matMenuTriggerFor]="menu">
+    <mat-icon svgIcon="add-file-menu"></mat-icon>
+    NEW
+</button>
+<mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="openFileDialog($event)">
+        <mat-icon svgIcon="add-file-icon"></mat-icon>
+        <mat-icon svgIcon="add-image-icon"></mat-icon>
+        <span>Upload files</span>
+        <input
+            #file_input
+            type="file"
+            accept=".jpg, .jpeg, .png, application/pdf"
+            multiple
+            (change)="onFileSelected($event)" 
+            style="display: none;"
+        />
+    </button>
+
+    <button mat-menu-item (click)="openFolderDialog($event)">
+        <mat-icon svgIcon="add-folder-icon"></mat-icon>
+        <span>Upload folder</span>
+        <input
+            #folder_input
+            type="file"
+            webkitdirectory
+            directory
+            (change)="onFolderSelected($event)" 
+            style="display: none;"
+        />
+    </button>
+</mat-menu>

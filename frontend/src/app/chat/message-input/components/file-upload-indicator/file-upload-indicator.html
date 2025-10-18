@@ -1,0 +1,14 @@
+<div class="
+        flex 
+        flex-wrap
+        justify-center
+        gap-x-6 mb-x-8
+    "
+    >
+    @for (image of images(); track image) {
+        <div class="relative">
+            <app-file-upload-item [imageUrl]="image" (deleteComponent)="deleteImage(image)" />
+        </div>
+    }
+</div>
+

@@ -1,0 +1,122 @@
+<header class="nav">
+    <div class="grid grid-flow-col justify-items-center">
+        <div>
+            <button 
+                type="button" 
+                (click)="setAuthenState(true)"
+                class="
+                    flex 
+                    w-0.3
+                    justify-center
+                    rounded-md 
+                    bg-indigo-500 
+                    px-3 
+                    py-1.5 
+                    text-sm/6 
+                    font-semibold 
+                    text-white 
+                    hover:bg-indigo-400 
+                    focus-visible:outline-2 
+                    focus-visible:outline-offset-2 
+                    focus-visible:outline-indigo-500"
+            >
+                Sign in
+            </button>
+        </div>
+        <div>
+            <button 
+                type="button"
+                (click)="setAuthenState(false)"
+                class="
+                    flex 
+                    w-0.3
+                    justify-center
+                    rounded-md 
+                    bg-indigo-500 
+                    px-3 
+                    py-1.5 
+                    text-sm/6
+                    font-semibold 
+                    text-white 
+                    hover:bg-indigo-400 
+                    focus-visible:outline-2 
+                    focus-visible:outline-offset-2 
+                    focus-visible:outline-indigo-500"
+            >
+                Register
+            </button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container hero-inner">
+        <div class="hero-copy">
+            <h1>Build faster. Ship smarter.</h1>
+            <p class="lead">A minimal, fast product that helps teams deliver features with confidence. Try it free for 14 days.</p>
+            <div class="hero-cta">
+            <a class="btn btn-primary" routerLink="/signup">Get started — it's free</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="mock-card">Your product screenshot</div>
+        </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+        <h2 class="section-title">What you get</h2>
+        <div class="grid grid-3">
+            <article class="card">
+            <h3>Easy integration</h3>
+            <p>Drop-in SDKs, example apps and simple APIs so you can get started in minutes.</p>
+            </article>
+            <article class="card">
+            <h3>Reliable</h3>
+            <p>Built with observability and fault tolerance in mind — production-ready from day one.</p>
+            </article>
+            <article class="card">
+            <h3>Team collaboration</h3>
+            <p>Invite teammates, set roles, and ship together with built-in reviews and approvals.</p>
+            </article>
+        </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing">
+        <div class="container">
+        <h2 class="section-title">Simple pricing</h2>
+        <div class="grid grid-3">
+            <div class="pricing-card">
+            <h4>Starter</h4>
+            <p class="price">Free</p>
+            <p>For personal projects and evaluation.</p>
+            <a class="btn btn-outline" routerLink="#">Choose</a>
+            </div>
+            <div class="pricing-card popular">
+            <h4>Pro</h4>
+            <p class="price">$29 / mo</p>
+            <p>Great for small teams.</p>
+            <a class="btn btn-primary" routerLink="#">Choose</a>
+            </div>
+            <div class="pricing-card">
+            <h4>Enterprise</h4>
+            <p class="price">Custom</p>
+            <p>Advanced features and SLAs.</p>
+            <a class="btn btn-outline" routerLink="#contact">Contact us</a>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <app-authen  #authenContainer [(shouldShowLogin)]="showLogin"/>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>© Product, Inc.</div>
+  </div>
+</footer>
+
