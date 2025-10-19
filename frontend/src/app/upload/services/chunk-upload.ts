@@ -11,7 +11,8 @@ export class ChunkUpload {
 
     constructor(private http: HttpClient) {}
   
-    public uploadFileInChunks(file: File): Observable<any> {
+    private uploadFileInChunks(file: File): Observable<any> {
+        console.log('run upload for file: ', file);
         const totalChunks = Math.ceil(file.size / this.chunkSize);
         let currentChunk = 0;
         const fileId = Date.now().toString(); // A unique ID for the server to reassemble
@@ -81,6 +82,29 @@ export class ChunkUpload {
       // Start the process
       return uploadNextChunk();
     }
+
+    public uploadFiles(inputFiles: FileList) {
+        for (let i = 0; i < inputFiles.length; i++) {
+            const currentFile = inputFiles.item(i) as File;
+            this.uploadFileInChunks(currentFile)
+            .subscribe({
+                next: (result) => {
+                    // This 'next' fires for every successful chunk response due to the concatMap structure,
+                    // or when the entire chain completes (depending on how concatMap is terminated).
+                    console.log('Upload in progress:', result);
+                },
+                error: (err) => {
+                    console.error('Upload failed:', err);
+                },
+                complete: () => {
+                    console.log('File upload completed successfully!');
+                    // Now call the finalize endpoint
+                }
+            });
+        }
+    }
+
+
 }
 
 

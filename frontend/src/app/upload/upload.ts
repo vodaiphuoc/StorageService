@@ -8,7 +8,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 import { ALLOWED_ACCEPT_STRING } from '@core/models/file-types';
 import { FileCheck } from './services/file-check';
-
+import { ChunkUpload } from './services/chunk-upload';
 import { Notification } from '@app/notification/notification';
 
 @Component({
@@ -25,6 +25,7 @@ export class Upload {
 
     // file check service
     private fileCheckService: FileCheck = inject(FileCheck);
+    private chunkUpload: ChunkUpload = inject(ChunkUpload);
 
     selectedFile: File | null = null;
 
@@ -56,6 +57,9 @@ export class Upload {
         if (input.files && input.files.length > 0) {
             const result = this.fileCheckService.filesCheck(input.files);
             console.log('result of file checking : ', result);
+            if (result) {
+                this.chunkUpload.uploadFiles(input.files);
+            }
         }
     }
 

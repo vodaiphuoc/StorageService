@@ -8,7 +8,7 @@ import type { ChunkUploadHeaders, ChunkUploadBody } from '@clone-google-drive/co
 // Use a temporary directory for storing chunks
 const TEMP_DIR = path.join(process.cwd(), 'temp_uploads');
 if (!fs.existsSync(TEMP_DIR)) {
-  fs.mkdirSync(TEMP_DIR, { recursive: true });
+    fs.mkdirSync(TEMP_DIR, { recursive: true });
 }
 
 /**
