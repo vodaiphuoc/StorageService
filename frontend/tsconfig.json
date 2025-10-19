@@ -18,6 +18,12 @@
     "paths": {
         "@app/*": [
             "src/app/*"
+        ],
+        "@core/*": [
+            "src/app/core/*"
+        ],
+        "@environment": [
+            "src/environments/environment.ts"
         ]
     }
   },
