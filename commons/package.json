@@ -1,0 +1,18 @@
+{
+  "name": "@clone-google-drive/commons",
+  "version": "1.0.1",
+  "description": "a common share for frontend and services",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.8.1",
+    "typescript": "^5.9.3"
+  }
+}
