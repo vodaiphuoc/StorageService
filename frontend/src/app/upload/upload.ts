@@ -9,9 +9,11 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ALLOWED_ACCEPT_STRING } from '@core/models/file-types';
 import { FileCheck } from './services/file-check';
 
+import { Notification } from '@app/notification/notification';
+
 @Component({
     selector: 'app-upload',
-    imports: [MatButtonModule, MatMenuModule, MatIconModule],
+    imports: [MatButtonModule, MatMenuModule, MatIconModule, Notification],
     templateUrl: './upload.html',
     styleUrl: './upload.css'
 })
@@ -52,8 +54,6 @@ export class Upload {
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
         if (input.files && input.files.length > 0) {
-            console.log(input.files);
-            console.log(input.files[0]);
             const result = this.fileCheckService.filesCheck(input.files);
             console.log('result of file checking : ', result);
         }
