@@ -4,7 +4,7 @@ import {
   } from '@angular/material/snack-bar';
 
 import { NotificationService } from '@core/services/notification';
-import { NotificationModel } from '@core/models/notifications';
+import type { NotificationModel } from '@core/models/notifications';
 
 @Component({
     selector: 'app-notification',

@@ -7,8 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 
-import { AuthenService } from '../../../../core/services/authen-service';
-import { LoginModel } from '../../../../core/models/authen-request';
+import { AuthenService } from '@core/services/authen-service';
+import type { LoginModel } from '@core/models/authen-request';
 
 @Component({
     selector: 'app-login',

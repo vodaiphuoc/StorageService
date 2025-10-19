@@ -4,16 +4,17 @@ import {
     FormControl,
     ReactiveFormsModule,
     AbstractControl,
-    ValidatorFn,
-    ValidationErrors
 } from '@angular/forms';
+
+import type { ValidationErrors, ValidatorFn } from '@angular/forms';
+
 import {Validators} from '@angular/forms';
 
 import {OverlayModule} from '@angular/cdk/overlay';
 import { ConnectionPositionPair } from '@angular/cdk/overlay';
 
-import { RegisterModel } from '../../../../core/models/authen-request';
-import { AuthenService } from '../../../../core/services/authen-service';
+import type { RegisterModel } from '@core/models/authen-request';
+import { AuthenService } from '@core/services/authen-service';
 
 /**
  * check matching of password and repeat password

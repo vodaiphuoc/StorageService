@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, finalize, map, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import { RegisterModel, LoginModel } from '../models/authen-request';
+import type { RegisterModel, LoginModel } from '@core/models/authen-request';
 
 @Injectable({
     providedIn: 'root'
