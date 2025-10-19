@@ -1,4 +1,6 @@
 .angular/
 deploy/
 node_modules/
-src/app/chat/
+temp/
+dist/
+*.tsbuildinfo
