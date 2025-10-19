@@ -10,7 +10,7 @@
         <input
             #file_input
             type="file"
-            accept=".jpg, .jpeg, .png, application/pdf"
+            [accept]="allowedFileTypesString"
             multiple
             (change)="onFileSelected($event)" 
             style="display: none;"
