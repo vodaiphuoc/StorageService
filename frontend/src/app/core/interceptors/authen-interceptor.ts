@@ -6,8 +6,6 @@ import { catchError, switchMap, throwError } from 'rxjs';
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
     const authenService = inject(AuthenService);
 
-    console.log('client inspect req: ', req);
-
     return next(req).pipe(
         catchError((error: HttpErrorResponse) => {
             if (error.status === 401 && !authenService.isRefreshing && error.message === 'Invalid or Expired') {
