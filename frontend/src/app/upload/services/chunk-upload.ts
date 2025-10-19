@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEventType } from '@angular/common/http';
+import { HttpHeaders, HttpClient, HttpEventType } from '@angular/common/http';
 import { Observable, filter, tap, concatMap, catchError, throwError } from 'rxjs';
+import type { ChunkUploadHeaders } from '@clone-google-drive/commons';
 
 @Injectable({
     providedIn: 'root'
@@ -28,19 +29,20 @@ export class ChunkUpload {
             const chunk = file.slice(start, end);
     
             // 2. Define headers/parameters for the server
-            const headers = {
+            const headersData: ChunkUploadHeaders = {
+                'File-Id': fileId,
+                'File-Name': file.name,
                 'Content-Type': 'application/octet-stream',
                 'Content-Range': `bytes ${start}-${end - 1}/${file.size}`,
-                'File-ID': fileId,
-                'File-Name': file.name,
+                'Chunk-Index': currentChunk.toString(),
+                'Total-Chunks': totalChunks.toString()
             };
             
-                
             return this.http.post(
-                'upload',
+                'chunk-upload',
                 chunk,
                 {
-                    headers: headers,
+                    headers: headersData,
                     reportProgress: true,
                     observe: 'events'
                 }
