@@ -7,6 +7,7 @@ COPY ./commons ./commons
 COPY ./frontend/deploy/nginx ./nginx
 
 RUN echo ls -la
+RUN npm run build --prefix ./commons
 RUN cd ./frontend && npm install .
 RUN cd ./frontend && npm run build 
 

@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY ./upload-service ./upload-service
 COPY ./commons ./commons
+COPY ./shared-clients ./shared-clients
 
 RUN echo ls -la
+RUN npm run build --prefix ./commons
+RUN npm run build --prefix ./shared-clients
 RUN cd ./upload-service && npm install .
 RUN cd ./upload-service && npm run build 
 
