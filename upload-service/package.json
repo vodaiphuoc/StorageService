@@ -11,7 +11,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "npm install ../commons && tsc -p tsconfig.json",
+    "build": "npm install ../commons && npm install ../shared-clients && tsc -p tsconfig.json",
     "start": "npm run build && node dist/index.js"
   },
   "keywords": [],
@@ -19,6 +19,8 @@
   "license": "ISC",
   "dependencies": {
     "@clone-google-drive/commons": "file:../commons",
+    "@clone-google-drive/shared-clients": "file:../shared-clients",
+    "@prisma/client": "^6.17.1",
     "@types/module-alias": "^2.0.4",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -30,6 +32,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
     "@types/node": "^24.8.1",
+    "prisma": "^6.17.1",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"

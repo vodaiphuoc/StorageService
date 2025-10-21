@@ -1,0 +1,50 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id   String  @id @map("user_id")
+    name String?
+    file File[]
+
+    @@map("user")
+}
+
+model File {
+    id           String   @id @map("file_id")
+    fileName     String   @map("file_name")
+    folderPath   String?  @map("folder_path")
+    mimeType     String   @map("mine_type")
+    totalChunk   Int      @map("total_chunk")
+    isComplete   Boolean  @default(false) @map("is_complete")
+    createdAt    DateTime @default(now()) @map("create_at")
+    uploadStatus Status   @default(PENDING) @map("upload_status")
+
+    User   User?   @relation(fields: [userId], references: [id])
+    userId String? @map("user_id")
+    chunk  Chunk[]
+
+    @@map("file")
+}
+
+model Chunk {
+    id          String @id
+    chunkId     Int
+    storagePath String @map("storage_path")
+    scanStatus  Status @default(PENDING) @map("scan_status")
+
+    File   File?   @relation(fields: [fileId], references: [id])
+    fileId String?
+}
+
+enum Status {
+    PENDING
+    FAILED
+    SUCCESS
+}

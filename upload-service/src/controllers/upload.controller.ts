@@ -1,12 +1,12 @@
-import { type Request, type Response } from 'express';
+import { Request, Response } from 'express';
 import express from 'express';
+import * as z from "zod";
+import * as crypto from 'crypto';
 
-import * as z from "zod"; 
-import * as fs from 'fs';
-import * as path from 'path';
 import {
     ChunkUploadHeaders,
-    ChunkUploadHeadersSchema
+    ChunkUploadHeadersSchema,
+    InitUploadReponse
 } from '@clone-google-drive/commons';
 
 import {
@@ -14,11 +14,15 @@ import {
     ChunkUploadBodySchema
 } from '@models/upload.model';
 
-// Use a temporary directory for storing chunks
-const TEMP_DIR = path.join(process.cwd(), 'temp_uploads');
-if (!fs.existsSync(TEMP_DIR)) {
-    fs.mkdirSync(TEMP_DIR, { recursive: true });
-}
+export const handleInitUpload = (req: Request, res: Response): void => {
+    const fileId = crypto.randomUUID();
+    const responseData: InitUploadReponse = {
+        "fileId": fileId
+    }
+    res.status(200).json(responseData);
+    return;
+};
+
 
 /**
  * Middleware to ensure the request body is handled as a raw buffer.
@@ -33,7 +37,7 @@ function validateChunkHeader(headers: Request['headers']) {
     try {
         return ChunkUploadHeadersSchema.parse(headers);
     } catch (error) {
-        if(error instanceof z.ZodError){
+        if (error instanceof z.ZodError) {
             error.issues;
             return null;
         } else {
@@ -48,8 +52,8 @@ function validateChunkHeader(headers: Request['headers']) {
  */
 export const handleChunkUpload = (req: Request, res: Response): void => {
     // 1. Validate and extract required headers
-    const headers: ChunkUploadHeaders|null = validateChunkHeader(req.headers);
-    
+    const headers: ChunkUploadHeaders | null = validateChunkHeader(req.headers);
+
     if (!headers) {
         res.sendStatus(405);
         return;
@@ -62,7 +66,6 @@ export const handleChunkUpload = (req: Request, res: Response): void => {
         return;
     }
 
-    
 };
 
 /**
@@ -71,11 +74,11 @@ export const handleChunkUpload = (req: Request, res: Response): void => {
 export const finalizeUpload = (req: Request, res: Response): void => {
     // In a production app, you would verify all chunks are present before finalizing.
     const { fileId } = req.body;
-    
+
     // Logic to reassemble files (omitted for brevity)
     // 1. Get total chunks from metadata/DB
     // 2. Loop through all temp chunks and append them to the final file
     // 3. Delete the temporary chunk files
-    
+
     res.status(200).send({ message: `File ${fileId} successfully assembled.` });
 };
