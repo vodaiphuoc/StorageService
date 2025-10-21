@@ -1,29 +1,28 @@
 import 'module-alias/register';
 import express from 'express';
-import type { Express, Response } from 'express';
+import type { Express, Request,Response } from 'express';
 import uploadRouter from '@routes/upload.route'; 
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT;
+const HOST = '0.0.0.0';
+const PORT = process.env.PORT;
 
-app.get('/', (res: Response) => {
+app.get('/', (req: Request, res: Response) => {
     res.send('Hello from Express with TypeScript!');
 });
 
 app.use(express.json()); 
-app.use('/upload', uploadRouter); 
+app.use('/api/upload', uploadRouter); 
 
 
-// Basic health check route
-app.get('/', (res: Response) => {
-    res.send('API is running.');
+app.get('/health', (req: Request, res: Response) => {
+    res.status(200).send('API is running.');
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+app.listen(PORT, HOST, () => {
+    console.log(`Server is running on port ${PORT} with host: ${HOST}`);
 });
-
 
