@@ -7,7 +7,8 @@ import type { ChunkUploadHeaders } from '@clone-google-drive/commons';
     providedIn: 'root'
 })
 export class ChunkUpload {
-    private chunkSize = 5*10**6; // 5 MB per chunk
+    private chunkSize = 5 * 10 ** 6; // 5 MB per chunk
+    private baseUrl: string = "/api/upload";
 
     constructor(private http: HttpClient) {}
   
@@ -20,7 +21,7 @@ export class ChunkUpload {
         const uploadNextChunk = (): Observable<any> => {
             if (currentChunk >= totalChunks) {
             // All chunks uploaded, signal completion
-                return this.http.post('/complete', { fileId: fileId });
+                return this.http.post(`${this.baseUrl}/complete`, { fileId: fileId });
             }
     
             const start = currentChunk * this.chunkSize;
@@ -31,16 +32,16 @@ export class ChunkUpload {
     
             // 2. Define headers/parameters for the server
             const headersData: ChunkUploadHeaders = {
-                'File-Id': fileId,
-                'File-Name': file.name,
-                'Content-Type': 'application/octet-stream',
-                'Content-Range': `bytes ${start}-${end - 1}/${file.size}`,
-                'Chunk-Index': currentChunk.toString(),
-                'Total-Chunks': totalChunks.toString()
+                'file-id': fileId,
+                'file-name': file.name,
+                'content-type': 'application/octet-stream',
+                'content-range': `bytes ${start}-${end - 1}/${file.size}`,
+                'chunk-index': currentChunk.toString(),
+                'total-chunks': totalChunks.toString()
             };
             
             return this.http.post(
-                'chunk-upload',
+                `${this.baseUrl}/chunk-upload`,
                 chunk,
                 {
                     headers: headersData,
