@@ -1,6 +1,7 @@
 .angular/
-deploy/
 node_modules/
 temp/
 dist/
 *.tsbuildinfo
+.env
+dev.note.md
