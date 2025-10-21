@@ -1,0 +1,47 @@
+name: clone-google-drive
+services:
+  frontend-angular:
+    container_name: $FRONTEND_CONTAINER
+    image: $FRONTEND_IMAGE
+    build:
+      context: ../
+      dockerfile: ./frontend/deploy/Dockerfile
+    restart: always
+    networks:
+      - gdrive-network
+    depends_on:
+      upload-service:
+        condition: service_healthy
+
+  upload-service:
+    container_name: $UPLOAD_CONTAINER
+    image: $UPLOAD_IMAGE
+    build:
+      context: ../
+      dockerfile: ./upload-service/Dockerfile
+    networks:
+      - gdrive-network
+    restart: always
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://0.0.0.0:8080 || exit 1 "]
+      interval: 5s
+      timeout: 4s
+      retries: 4
+      start_period: 25s
+
+  ngrok-service:
+    image: ngrok/ngrok
+    container_name: $NGROK_CONTAINER
+    command: "start my-app-endpoint --config /etc/ngrok.yml"
+    volumes:
+      - "${NGROK_CONFIG_PATH}:/etc/ngrok.yml"
+    depends_on:
+      - frontend-angular
+    networks:
+      - gdrive-network
+
+networks:
+  gdrive-network:
+    driver: bridge
