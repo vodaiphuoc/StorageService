@@ -1,0 +1,28 @@
+{
+  "name": "@clone-google-drive/shared-clients",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
+    "minio": "^8.0.6",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.6",
+    "@types/minio": "^7.1.0",
+    "@types/node": "^24.9.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
+  }
+}
