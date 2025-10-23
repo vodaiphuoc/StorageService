@@ -12,7 +12,7 @@ import type {
     providedIn: 'root'
 })
 export class ChunkUpload {
-    private chunkSize = 5 * 10 ** 6; // 5 MB per chunk
+    private chunkSize = 2 * 10 ** 6; // 2 MB per chunk
     private baseUrl: string = "/api/upload";
 
     constructor(private http: HttpClient) { };
@@ -55,7 +55,9 @@ export class ChunkUpload {
             const end = Math.min(start + this.chunkSize, file.size);
 
             // 1. Slice the file to get the current chunk as a Blob
-            const chunk = file.slice(start, end);
+            const chunk = file.slice(start, end, file.type);
+
+            console.log('chunk: ', chunk);
 
             // 2. Define headers/parameters for the server
             const headersData: ChunkUploadHeaders = {
@@ -65,14 +67,15 @@ export class ChunkUpload {
                 'chunk-index': currentChunk.toString(),
                 'total-chunks': totalChunks.toString()
             };
-
+            
             return this.http.post(
                 `${this.baseUrl}/chunk-upload`,
                 chunk,
                 {
                     headers: headersData,
                     reportProgress: true,
-                    observe: 'events'
+                    observe: 'events',
+                    responseType: "text"
                 }
             )
                 .pipe(
@@ -135,21 +138,6 @@ export class ChunkUpload {
                     }
             })
 
-            // this.uploadFileInChunks(currentFile)
-            //     .subscribe({
-            //         next: (result) => {
-            //             // This 'next' fires for every successful chunk response due to the concatMap structure,
-            //             // or when the entire chain completes (depending on how concatMap is terminated).
-            //             console.log('Upload in progress:', result);
-            //         },
-            //         error: (err) => {
-            //             console.error('Upload failed:', err);
-            //         },
-            //         complete: () => {
-            //             console.log('File upload completed successfully!');
-            //             // Now call the finalize endpoint
-            //         }
-            //     });
         }
     }
 

@@ -2,11 +2,14 @@ import 'module-alias/register';
 import express from 'express';
 import type { Express, Request,Response } from 'express';
 import uploadRouter from '@routes/upload.route'; 
+
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-// import { RabbitMQService, MinioService } from '@clone-google-drive/shared-clients';
+import { RabbitMQService, MinioService } from '@clone-google-drive/shared-clients';
 
-dotenv.config();
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({path: envPath});
 
 const app: Express = express();
 const HOST = '0.0.0.0';

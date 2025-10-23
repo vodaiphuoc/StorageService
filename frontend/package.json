@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npm install ../commons && ng build",
+    "build": "ng build",
     "test": "ng test",
     "serve:ssr:frontendv2": "node dist/frontendv2/server/server.mjs",
     "serve": "ng build && node dist/frontendv2/server/server.mjs"

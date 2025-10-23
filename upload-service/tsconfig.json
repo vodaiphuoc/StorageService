@@ -36,9 +36,6 @@
     "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
-        "@/*": [
-            "*"
-        ], 
         "@controllers/*": [
             "src/controllers/*"
         ],
@@ -52,6 +49,7 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/type/*"
-  ]
+    "src/types/*"
+  ],
+  "exclude": ["node_modules"]
 }
