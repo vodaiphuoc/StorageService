@@ -27,7 +27,7 @@
                     ],
                     "styles": [
                         "src/custom-theme.scss",
-                        "src/styles.css"
+                        "src/styles.scss"
                     ],
                     "aot": true,
                     "server": "src/main.server.ts",
@@ -97,7 +97,8 @@
                         "src/assets"
                     ],
                     "styles": [
-                        "src/styles.css"
+                        "src/styles.scss",
+                        "src/custom-theme.scss"
                     ]
                 }
             }

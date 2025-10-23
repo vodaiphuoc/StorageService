@@ -1,13 +1,13 @@
 {
-  "name": "frontendv2",
+  "name": "frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "serve:ssr:frontendv2": "node dist/frontendv2/server/server.mjs",
-    "serve": "ng build && node dist/frontendv2/server/server.mjs"
+    "serve:ssr:frontend": "node dist/frontend/server/server.mjs",
+    "serve": "ng build && node dist/frontend/server/server.mjs"
   },
   "prettier": {
     "printWidth": 100,
@@ -34,11 +34,11 @@
     "@angular/router": "^20.2.0",
     "@angular/ssr": "^20.3.6",
     "@clone-google-drive/commons": "file:../commons",
-    "@tailwindcss/postcss": "^4.1.13",
+    "@tailwindcss/postcss": "^4.1.16",
     "express": "^5.1.0",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
-    "tailwindcss": "^4.1.13",
+    "tailwindcss": "^4.1.16",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
