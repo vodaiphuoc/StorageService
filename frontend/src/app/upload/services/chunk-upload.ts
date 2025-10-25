@@ -17,7 +17,7 @@ export class ChunkUpload {
 
     constructor(private http: HttpClient) { };
 
-    private initUpload(file: File): Observable<InitUploadReponse>{
+    private initUpload(file: File, totalChunks: number): Observable<InitUploadReponse>{
         const headersData: InitUploadHeaders = {
             'user-id': '13131',
             'content-type': 'application/json'
@@ -25,8 +25,10 @@ export class ChunkUpload {
 
         const bodyData: InitUploadBody = {
             'file-name': file.name,
+            'file-path': file.webkitRelativePath,
             'mine-type': file.type,
-            'file-size': file.size.toString()
+            'file-size': file.size,
+            'total-chunks': totalChunks
         }
 
         return this.http.post<InitUploadReponse>(
@@ -40,9 +42,8 @@ export class ChunkUpload {
         )
     };
 
-    private uploadFileInChunks(file: File, fileId: string): Observable<any> {
+    private uploadFileInChunks(file: File, fileId: string, totalChunks: number): Observable<any> {
         console.log('run upload for file: ', file);
-        const totalChunks = Math.ceil(file.size / this.chunkSize);
         let currentChunk = 0;
 
         const uploadNextChunk = (): Observable<any> => {
@@ -116,12 +117,13 @@ export class ChunkUpload {
     public uploadFiles(inputFiles: FileList) {
         for (let i = 0; i < inputFiles.length; i++) {
             const currentFile = inputFiles.item(i) as File;
+            const totalChunks = Math.ceil(currentFile.size / this.chunkSize);
 
-            this.initUpload(currentFile)
+            this.initUpload(currentFile, totalChunks)
                 .pipe(
                     concatMap((reponse: InitUploadReponse) => {
                         const fileId = reponse.fileId;
-                        return this.uploadFileInChunks(currentFile, fileId);
+                        return this.uploadFileInChunks(currentFile, fileId, totalChunks);
                 })
             )
                 .subscribe({
