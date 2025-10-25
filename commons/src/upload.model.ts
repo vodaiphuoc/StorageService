@@ -22,8 +22,10 @@ export type InitUploadHeaders = z.infer<typeof InitUploadHeadersSchema>;
  */
 export const InitUploadBodySchema = z.object({
     'file-name': z.string(),
+    'file-path': z.string(),
     'mine-type': z.string(),
-    'file-size': z.string().regex(/[0-9]/)
+    'file-size': z.number(),
+    'total-chunks': z.number()
 });
 
 /**
