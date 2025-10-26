@@ -22,6 +22,13 @@ UPLOAD_CONTAINER=clonedrive-upload
 # ngrok
 NGROK_CONTAINER=clonedrive-ngrok
 
+# min io
+MINIO_CONTAINER=clonedrive-minio
+
+# postgres
+POSTGRES_CONTAINER=clonedrive-postgres
+DB_CONTENT=$(cat "$CURRENT_FILE_DIR/.db.env")
+
 # make ngrok config
 cat <<EOF > "$CURRENT_FILE_DIR/ngrok.yml"
 version: 3
@@ -44,8 +51,11 @@ FRONTEND_IMAGE=$FRONTEND_IMAGE
 FRONTEND_CONTAINER=$FRONTEND_CONTAINER
 UPLOAD_IMAGE=$UPLOAD_IMAGE
 UPLOAD_CONTAINER=$UPLOAD_CONTAINER
+MINIO_CONTAINER=$MINIO_CONTAINER
+POSTGRES_CONTAINER=$POSTGRES_CONTAINER
 NGROK_CONTAINER=$NGROK_CONTAINER
 NGROK_CONFIG_PATH="$CURRENT_FILE_DIR/ngrok.yml"
+$DB_CONTENT
 EOF
 
 # clean up
@@ -63,6 +73,5 @@ trap cleanup SIGINT
 # run docker compose
 echo "current dir: $CURRENT_FILE_DIR/.env"
 docker compose \
-  --env-file "$CURRENT_FILE_DIR/.env" \
   -f "$CURRENT_FILE_DIR/Docker-compose.yaml" \
   up --abort-on-container-exit --build
