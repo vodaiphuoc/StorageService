@@ -6,8 +6,12 @@
   "_moduleAliases": {
     "@": "dist",
     "@controllers": "dist/controllers",
+    "@middlewares": "dist/middlewares",
     "@routes": "dist/routes",
-    "@models": "dist/models"
+    "@models": "dist/models",
+    "@utils": "dist/utils",
+    "@generated-prisma": "dist/generated/prisma",
+    "@lib": "dist/lib"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -35,7 +39,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.8.1",
     "@types/winston": "^2.4.4",
-    "prisma": "^6.17.1",
+    "prisma": "^6.18.0",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
