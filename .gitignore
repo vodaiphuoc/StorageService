@@ -6,5 +6,6 @@ dist/
 *.env
 dev.note.md
 .vscode
-
+*.yml
 **/generated/prisma/
+migrations/
