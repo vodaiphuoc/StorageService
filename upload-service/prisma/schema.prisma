@@ -10,7 +10,7 @@ datasource db {
 }
 
 model User {
-    id   String  @id @map("user_id")
+    id   String  @id @map("user_id") @default("123")
     name String?
     file File[]
 

@@ -2,6 +2,7 @@ import { PrismaClient } from '@generated-prisma/client';
 import { ChunkModel } from '@generated-prisma/models/Chunk';
 import { FileModel } from '@generated-prisma/models/File';
 import { getLogger } from '@utils/logger';
+
 const logger = getLogger(__filename);
 
 
@@ -32,5 +33,40 @@ export class DBService {
         return await this.prismaClient.chunk.create({ data: chunk });
     }
 
+
+    /**
+     * Get list of fileId of the user
+     * @param userId 
+     * @returns 
+     */
+    public async getAllFiles(userId: string) {
+        return await this.prismaClient.user.findMany({
+            where: {
+                id: userId
+            }
+        })
+    }
+
+    /**
+     * Get sepecific file
+     * @param userId 
+     * @param fileId 
+     * @returns 
+     */
+    public async getFile(fileId: string) {
+        const chunks: ChunkModel[] = await this.prismaClient.chunk.findMany({
+            where: {
+                id: fileId
+            }
+        });
+        
+        
+
+    }
+
+
+    public async getChunks() {
+
+    }
 
 }

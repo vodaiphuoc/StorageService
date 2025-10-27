@@ -19,7 +19,7 @@ export class ChunkUpload {
 
     private initUpload(file: File, totalChunks: number): Observable<InitUploadReponse>{
         const headersData: InitUploadHeaders = {
-            'user-id': '13131',
+            'user-id': '123',
             'content-type': 'application/json'
         };
 

@@ -12,8 +12,7 @@ import {
 import { MinioService } from '@clone-google-drive/shared-clients';
 
 import {
-    ChunkUploadBody,
-    ChunkUploadBodySchema
+    ChunkUploadBody
 } from '@models/upload.model';
 
 import { getLogger } from '@utils/logger';

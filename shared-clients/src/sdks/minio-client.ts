@@ -101,7 +101,7 @@ export class MinioService {
         contentType: string
     ): Promise<string> {
         console.log(`MinIO: Starting upload for ${objectName}`);
-        
+        this.minioClient.completeMultipartUpload
         await this.minioClient.putObject(this.bucketName, objectName, stream, size, {
             'Content-Type': contentType
         });
