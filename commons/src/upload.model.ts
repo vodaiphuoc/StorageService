@@ -35,7 +35,8 @@ export const InitUploadBodySchema = z.object({
 export type InitUploadBody = z.infer<typeof InitUploadBodySchema>;
 
 export interface InitUploadReponse {
-    fileId: string
+    fileId: string,
+    uploadId: string
 }
 
 /**
@@ -43,9 +44,12 @@ export interface InitUploadReponse {
  * on backend
  */
 export const ChunkUploadHeadersSchema = z.object({
+    'user-id': z.string(),
     'file-id': z.uuidv4(),
+    'upload-id': z.string(),
     'content-range': z.string().regex(/^bytes/),
     'content-type': z.string('application/octet-stream'),
+    'mine-type': z.string(),
     'chunk-index': z.string(),
     'total-chunks': z.string().min(1)
 });
@@ -56,3 +60,34 @@ export const ChunkUploadHeadersSchema = z.object({
  */
 export type ChunkUploadHeaders = z.infer<typeof ChunkUploadHeadersSchema>;
 
+
+
+/**
+ * Schema and type for ChunkEtag between frontend and upload service
+ * 
+ */
+export const chunkEtagSchema = z.object({
+    'part': z.number(),
+    'etag': z.string()
+})
+export type ChunkEtag = z.infer<typeof chunkEtagSchema>;
+
+/**
+ * Schema and type for complete upload header
+ * 
+ */
+export const completeUploadHeadersSchema = InitUploadHeadersSchema.extend({});
+export type completeUploadHeaders = z.infer<typeof completeUploadHeadersSchema>;
+
+
+/**
+ * Schema and type for complete upload body
+ * 
+ */
+export const completeUploadBodySchema = z.object({
+    'file-id': z.uuidv4(),
+    'upload-id': z.string(),
+    'etags': z.array(chunkEtagSchema)
+})
+
+export type completeUploadBody = z.infer<typeof completeUploadBodySchema>;
