@@ -1,12 +1,16 @@
-import { Client as MinioClient } from 'minio';
+import { Client as MinioClient, ClientOptions } from 'minio';
+
 import { Readable } from 'stream';
 import * as winston from 'winston';
+
+import { MinioChunkEtag, FileEtag } from '../models/minio.model';
 
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json()
+        winston.format.timestamp(),
+        winston.format.json(),
+        winston.format.errors({stack : true})
     ),
     transports: [
       new winston.transports.Console(),
@@ -40,16 +44,16 @@ export class MinioService {
                 port: port,
                 useSSL: secure,
                 accessKey: accessKey,
-                secretKey: secretKey
+                secretKey: secretKey,
+                partSize: 5 * 1024 * 1024
             });
         } catch (error) {
-            logger.error('MinIO Client Initialization Failed: ', { error: error });
+            logger.error(`MinIO Client Initialization Failed: ${error}`);
             throw error;
         }
 
         this.initializeBucket().catch(error => {
-            console.error("MinIO Bucket Initialization Failed:", error);
-            logger.error('MinIO Bucket Initialization Failed: ', { error: error });
+            logger.error(`MinIO Bucket Initialization Failed: ${error}`);
         });
     }
 
@@ -87,27 +91,77 @@ export class MinioService {
     }
 
     /**
-     * Uploads a file (or file chunk) stream to MinIO.
-     * @param objectName The final name of the file (e.g., 'document-abc.pdf').
-     * @param stream The readable stream of the file content.
-     * @param size The size of the object in bytes.
-     * @param contentType The MIME type.
-     * @returns The S3 URI location.
+     * Init multi part upload
+     * @param {string} objectName : object key to save and retrieve
+     * @param {string} contentType : content-type
+     * @returns 
      */
-    public async uploadStream(
-        objectName: string, 
-        stream: Buffer, 
-        size: number, 
+    public async initUpload(
+        objectName: string,
         contentType: string
-    ): Promise<string> {
-        console.log(`MinIO: Starting upload for ${objectName}`);
-        this.minioClient.completeMultipartUpload
-        await this.minioClient.putObject(this.bucketName, objectName, stream, size, {
-            'Content-Type': contentType
-        });
+    ) {
+        return await this.minioClient.initiateNewMultipartUpload(
+            this.bucketName,
+            objectName,
+            {
+                "Content-Type": contentType
+            }
+        );
+    }
+    
+
+    /**
+     * Upload chunk
+     * @param objectName The final name of the file (e.g., 'document-abc.pdf').
+     * @param uploadId uploadId return from initUpload method
+     * @param chunkId The size of the object in bytes.
+     * @param contentType The MIME type.
+     * @returns etag value
+     */
+    public async uploadParts(
+        objectName: string,
+        uploadId: string, 
+        chunkId: number, 
+        contentType: string,
+        chunk: Buffer
+    ): Promise<MinioChunkEtag> {
+        console.log(`MinIO: Starting upload for ${objectName}, ${contentType}, ${chunkId}`);
         
-        console.log(`MinIO: Uploaded successfully: ${objectName}`);
-        return `s3://${this.bucketName}/${objectName}`;
+        const etag = await this.minioClient.uploadPart({
+            bucketName: this.bucketName,
+            objectName: objectName,
+            uploadID: uploadId,
+            partNumber: chunkId,
+            headers: {
+                'Content-Type': contentType
+            }
+        },
+        chunk
+        );
+
+        return {
+            part: etag.part,
+            etag: etag.etag
+        };
+    }
+
+    /**
+     * Finsh and merge all chunks into single object
+     * @param objectName 
+     * @param uploadId 
+     * @param etags 
+     */
+    public async completeUpload(
+        objectName: string,
+        uploadId: string,
+        etags: MinioChunkEtag[]
+    ): Promise<FileEtag> {
+        return await this.minioClient.completeMultipartUpload(
+            this.bucketName,
+            objectName,
+            uploadId,
+            etags
+        )
     }
 
     /**

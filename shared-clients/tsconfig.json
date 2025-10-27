@@ -34,20 +34,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "baseUrl": "./",
-    "paths": {
-        "@/*": [
-            "*"
-        ], 
-        "@controllers/*": [
-            "src/controllers/*"
-        ],
-        "@models/*": [
-            "src/models/*"
-        ],
-        "@routes/*": [
-            "src/routes/*"
-        ],
-    }
   },
   "include": [
     "src/**/*.ts",
