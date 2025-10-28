@@ -6,10 +6,17 @@ import {
     ChunkUploadHeaders,
     InitUploadHeaders,
     InitUploadBody,
-    InitUploadReponse
+    InitUploadReponse,
+    ChunkEtag
 } from '@clone-google-drive/commons';
 
-import { MinioService } from '@clone-google-drive/shared-clients';
+import {
+    completeUploadBody,
+    completeUploadHeaders
+} from '@clone-google-drive/commons';
+
+
+import { MinioService, FileEtag } from '@clone-google-drive/shared-clients';
 
 import {
     ChunkUploadBody
@@ -31,6 +38,8 @@ export const handleInitUpload = async (req: Request, res: Response) => {
         const fileId = crypto.randomUUID();
 
         const dbService: DBService = DBService.getInstance();
+        const minioService = MinioService.getInstance();
+
         await dbService.createFile({
             id: fileId,
             fileName: requestBody['file-name'],
@@ -43,12 +52,16 @@ export const handleInitUpload = async (req: Request, res: Response) => {
             userId: requestHeaders['user-id']
         });
 
+        const uploadId = await minioService.initUpload(fileId, requestBody['mine-type']);
+
         const responseData: InitUploadReponse = {
-            "fileId": fileId
+            "fileId": fileId,
+            "uploadId": uploadId
         }
         return res.status(200).json(responseData);
+
     } catch (error) {
-        logger.error('Init upload field', {error: error});
+        logger.error(`Init upload field ${error}`);
         return res.status(500).json({ 
             message: "Failed to initialize file upload due to a server error." 
         });
@@ -57,15 +70,13 @@ export const handleInitUpload = async (req: Request, res: Response) => {
 };
 
 
-
-
 /**
  * Middleware to ensure the request body is handled as a raw buffer.
  * MUST be applied to the specific route before the handler.
  */
 export const rawBodyParser = express.raw({
     type: 'application/octet-stream',
-    limit: 2 * 10 ** 6,
+    limit: 5 * 1024 * 1024,
 });
 
 
@@ -79,27 +90,18 @@ export const handleChunkUpload = async (req: Request, res: Response) => {
         const chunk: ChunkUploadBody = req.body as ChunkUploadBody;
         
         const minioService = MinioService.getInstance();
-        const s3Path = await minioService.uploadStream(
-            `${headers['file-id']}_${headers['chunk-index']}`,
-            chunk,
-            chunk.length,
-            headers['content-type']
+        const etag: ChunkEtag = await minioService.uploadPart(
+            headers['file-id'],
+            headers['upload-id'],
+            parseInt(headers['chunk-index'],10),
+            headers['mine-type'],
+            chunk
         )
-        const chunkId = crypto.randomUUID();
 
-        const dbService: DBService = DBService.getInstance();
-        await dbService.createChunk({
-            id: chunkId,
-            chunkId: parseInt(headers['chunk-index'],10),
-            storagePath: s3Path,
-            scanStatus: Status.PENDING,
-            fileId: headers['file-id']
-        });
-
-        res.sendStatus(200);
+        res.status(200).json(etag);
         return;
     } catch (error) {
-        logger.error('Chunk upload field', {error: error});
+        logger.error(`Chunk upload field: ${error}`);
         return res.status(500).json({ 
             message: "Failed to initialize file upload due to a server error." 
         });
@@ -110,14 +112,32 @@ export const handleChunkUpload = async (req: Request, res: Response) => {
 /**
  * Handler to finalize the upload after all chunks are received.
  */
-export const finalizeUpload = (req: Request, res: Response): void => {
-    // In a production app, you would verify all chunks are present before finalizing.
-    const { fileId } = req.body;
+export const finalizeUpload = async (req: Request, res: Response) => {
+    const dbService: DBService = DBService.getInstance();
+    const minioService = MinioService.getInstance();
+    const requestHeaders = req.headers as completeUploadHeaders;
+    const requestBody = req.body as completeUploadBody;
 
-    // Logic to reassemble files (omitted for brevity)
-    // 1. Get total chunks from metadata/DB
-    // 2. Loop through all temp chunks and append them to the final file
-    // 3. Delete the temporary chunk files
+    try {
+        
+        const fileEtag: FileEtag = await minioService.completeUpload(
+            requestBody['file-id'],
+            requestBody['upload-id'],
+            requestBody.etags
+        );
 
-    res.status(200).send({ message: `File ${fileId} successfully assembled.` });
+        logger.info(`finalizeUpload, fileEtag: ${fileEtag}`);
+
+        await dbService.updateUploadStatus(requestBody['file-id'], requestHeaders['user-id'], 'SUCCESS');
+
+        res.sendStatus(200);
+        return;
+    } catch (error) {
+        logger.error(`complete upload field ${error}`);
+        await dbService.updateUploadStatus(requestBody['file-id'], requestHeaders['user-id'], 'FAILED');
+        return res.status(500).json({ 
+            message: "Failed to initialize file upload due to a server error." 
+        });      
+    }
+    
 };

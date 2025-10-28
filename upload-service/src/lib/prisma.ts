@@ -1,6 +1,6 @@
 import { PrismaClient } from '@generated-prisma/client';
-import { ChunkModel } from '@generated-prisma/models/Chunk';
 import { FileModel } from '@generated-prisma/models/File';
+import { Status } from '@generated-prisma/client';
 import { getLogger } from '@utils/logger';
 
 const logger = getLogger(__filename);
@@ -29,8 +29,20 @@ export class DBService {
         return await this.prismaClient.file.create({ data: file });
     }
 
-    public async createChunk(chunk: ChunkModel) {
-        return await this.prismaClient.chunk.create({ data: chunk });
+    public async updateUploadStatus(
+        fileId: string,
+        userId: string,
+        newStatus: Status
+    ) {
+        await this.prismaClient.file.update({
+            where: {
+                id: fileId,
+                userId: userId
+            },
+            data: {
+                uploadStatus: newStatus
+            }
+        })
     }
 
 
@@ -54,19 +66,15 @@ export class DBService {
      * @returns 
      */
     public async getFile(fileId: string) {
-        const chunks: ChunkModel[] = await this.prismaClient.chunk.findMany({
-            where: {
-                id: fileId
-            }
-        });
+        // const chunks: ChunkModel[] = await this.prismaClient.chunk.findMany({
+        //     where: {
+        //         id: fileId
+        //     }
+        // });
         
         
 
     }
 
-
-    public async getChunks() {
-
-    }
 
 }

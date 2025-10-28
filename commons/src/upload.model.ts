@@ -34,6 +34,10 @@ export const InitUploadBodySchema = z.object({
  */
 export type InitUploadBody = z.infer<typeof InitUploadBodySchema>;
 
+/**
+ * @param {string} fileId
+ * @param {string} uploadId
+ */
 export interface InitUploadReponse {
     fileId: string,
     uploadId: string

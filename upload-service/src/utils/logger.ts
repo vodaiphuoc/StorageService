@@ -33,7 +33,8 @@ export function getLogger(modulePath: string): winston.Logger {
             winston.format.timestamp({
                 format: 'YYYY-MM-DD HH:mm:ss'
             }),
-            winston.format.label({ label: moduleName })
+            winston.format.label({ label: moduleName }),
+            winston.format.errors({stack: true})
         ),
         transports: transports,
     });

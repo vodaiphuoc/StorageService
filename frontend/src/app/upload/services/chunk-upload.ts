@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable, filter, tap, concatMap, catchError, throwError } from 'rxjs';
 import type {
     InitUploadHeaders,
     InitUploadBody,
     InitUploadReponse,
-    ChunkUploadHeaders
+    ChunkUploadHeaders,
+    ChunkEtag,
+    completeUploadBody
 } from '@clone-google-drive/commons';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ChunkUpload {
-    private chunkSize = 2 * 10 ** 6; // 2 MB per chunk
+    private chunkSize = 5 * 1024 * 1024;
     private baseUrl: string = "/api/upload";
 
     constructor(private http: HttpClient) { };
@@ -42,41 +44,66 @@ export class ChunkUpload {
         )
     };
 
-    private uploadFileInChunks(file: File, fileId: string, totalChunks: number): Observable<any> {
+    private uploadFileInChunks(
+        file: File,
+        fileId: string,
+        uploadId: string,
+        totalChunks: number
+    ): Observable<any> {
         console.log('run upload for file: ', file);
-        let currentChunk = 0;
+        let currentChunk = 1;
+        let etags: ChunkEtag[]= [];
 
         const uploadNextChunk = (): Observable<any> => {
-            if (currentChunk >= totalChunks) {
-                // All chunks uploaded, signal completion
-                return this.http.post(`${this.baseUrl}/complete`, { fileId: fileId });
+            if (currentChunk > totalChunks) {
+                console.log(`run complete: ${currentChunk}, ${totalChunks}`);
+                const completeRequestBody: completeUploadBody = {
+                    "file-id": fileId,
+                    "upload-id": uploadId,
+                    "etags": etags
+                }
+
+                return this.http.post(
+                    `${this.baseUrl}/complete`,
+                    completeRequestBody,
+                    {
+                        headers: {
+                            'user-id': '123',
+                            'content-type': 'application/json'
+                        },
+                        responseType: "text"
+                    }
+                );
             }
 
-            const start = currentChunk * this.chunkSize;
+            const start = (currentChunk-1) * this.chunkSize;
             const end = Math.min(start + this.chunkSize, file.size);
 
             // 1. Slice the file to get the current chunk as a Blob
             const chunk = file.slice(start, end, file.type);
 
-            console.log('chunk: ', chunk);
+            console.log(`chunk ${currentChunk}: ${chunk}`);
 
             // 2. Define headers/parameters for the server
             const headersData: ChunkUploadHeaders = {
+                'user-id': '123',
                 'file-id': fileId,
-                'content-type': 'application/octet-stream',
+                'upload-id': uploadId,
                 'content-range': `bytes ${start}-${end - 1}/${file.size}`,
+                'content-type': 'application/octet-stream',
+                'mine-type': file.type,
                 'chunk-index': currentChunk.toString(),
                 'total-chunks': totalChunks.toString()
             };
             
-            return this.http.post(
+            return this.http.post<ChunkEtag>(
                 `${this.baseUrl}/chunk-upload`,
                 chunk,
                 {
                     headers: headersData,
                     reportProgress: true,
                     observe: 'events',
-                    responseType: "text"
+                    responseType: "json"
                 }
             )
                 .pipe(
@@ -87,22 +114,25 @@ export class ChunkUpload {
 
                             // You would typically use another RxJS Subject here 
                             // to emit the total upload progress to a UI component.
-                            console.log(`Chunk ${currentChunk + 1}/${totalChunks} Progress: ${chunkProgress}%`);
+                            console.log(`Chunk ${currentChunk}/${totalChunks} Progress: ${chunkProgress}%`);
                         }
                     }),
                     filter(event => event.type === HttpEventType.Response),
-                    tap(() => {
-                        // 2. SUCCESS HANDLING (Chunk complete)
-                        currentChunk++;
+                    tap((responseEtag: HttpResponse<ChunkEtag>) => {
                         console.log(`Chunk ${currentChunk} successfully uploaded.`);
+                        // 2. SUCCESS HANDLING (Chunk complete)
+                        const etag = responseEtag.body as ChunkEtag;
+                        currentChunk++;
+                        etags.push(etag);
+                        console.log(`Current etags: ${etags}`);
                     }),
                     // 3. FAILURE HANDLING
                     catchError((error) => {
-                        console.error(`Upload failed for chunk ${currentChunk + 1}:`, error);
+                        console.error(`Upload failed for chunk ${currentChunk}:`, error);
 
                         // Here you can implement retry logic (e.g., attempt to re-upload the same chunk)
                         // For now, we signal an error and stop the chain
-                        return throwError(() => new Error(`Chunk upload failed: ${currentChunk + 1}`));
+                        return throwError(() => new Error(`Chunk upload failed: ${currentChunk}`));
                     }),
                     // 4. CONTINUE: Recursively call the next chunk upload only on success
                     concatMap(() => uploadNextChunk())
@@ -123,7 +153,13 @@ export class ChunkUpload {
                 .pipe(
                     concatMap((reponse: InitUploadReponse) => {
                         const fileId = reponse.fileId;
-                        return this.uploadFileInChunks(currentFile, fileId, totalChunks);
+                        const uploadId = reponse.uploadId;
+                        return this.uploadFileInChunks(
+                            currentFile,
+                            fileId,
+                            uploadId,
+                            totalChunks
+                        );
                 })
             )
                 .subscribe({

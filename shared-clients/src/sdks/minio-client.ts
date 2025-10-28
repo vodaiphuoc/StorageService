@@ -112,13 +112,13 @@ export class MinioService {
 
     /**
      * Upload chunk
-     * @param objectName The final name of the file (e.g., 'document-abc.pdf').
+     * @param objectName
      * @param uploadId uploadId return from initUpload method
      * @param chunkId The size of the object in bytes.
      * @param contentType The MIME type.
      * @returns etag value
      */
-    public async uploadParts(
+    public async uploadPart(
         objectName: string,
         uploadId: string, 
         chunkId: number, 

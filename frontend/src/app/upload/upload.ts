@@ -25,7 +25,7 @@ export class Upload {
 
     // file check service
     private fileCheckService: FileCheck = inject(FileCheck);
-    private chunkUpload: ChunkUpload = inject(ChunkUpload);
+    private chunkUploadService: ChunkUpload = inject(ChunkUpload);
 
     selectedFile: File | null = null;
 
@@ -58,7 +58,7 @@ export class Upload {
             const result = this.fileCheckService.filesCheck(input.files);
             console.log('result of file checking : ', result);
             if (result) {
-                this.chunkUpload.uploadFiles(input.files);
+                this.chunkUploadService.uploadFiles(input.files);
             }
         }
     }
