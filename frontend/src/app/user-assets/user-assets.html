@@ -1,1 +1,5 @@
-<p>user-assets works!</p>
+@if (renderType() === 'folder') {
+    <app-view-folder [itemList]="itemList()"/>
+} @else {
+    <app-view-file [safeFileURL]="safeFileURL"/>
+}

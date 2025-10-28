@@ -74,4 +74,4 @@ trap cleanup SIGINT
 echo "current dir: $CURRENT_FILE_DIR/.env"
 docker compose \
   -f "$CURRENT_FILE_DIR/Docker-compose.yaml" \
-  up --abort-on-container-exit --build
+  up --abort-on-container-exit
