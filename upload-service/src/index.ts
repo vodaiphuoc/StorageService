@@ -2,6 +2,7 @@ import 'module-alias/register';
 import express from 'express';
 import type { Express, Request,Response } from 'express';
 import uploadRouter from '@routes/upload.route'; 
+import fileRouter from '@routes/file.route';
 
 import * as dotenv from 'dotenv';
 import * as path from 'path';
@@ -33,6 +34,7 @@ DBService.getInstance();
 app.use(express.json());
 
 app.use('/api/upload', uploadRouter); 
+app.use('/api/file', fileRouter);
 
 app.get('/health', (req: Request, res: Response) => {
     MinioService.getInstance();

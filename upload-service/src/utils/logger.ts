@@ -4,7 +4,7 @@ import * as path from 'path';
 const consoleFormat = winston.format.combine(
     winston.format.colorize(),
     winston.format.printf(info => {
-        const module = info['moduleName'] || 'APP';
+        const module = info['label'] || 'APP';
         return `[${info['timestamp']}] [${module}] ${info.level}: ${info.message}`;
     })
 );

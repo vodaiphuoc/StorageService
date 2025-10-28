@@ -3,6 +3,12 @@ import { FileModel } from '@generated-prisma/models/File';
 import { Status } from '@generated-prisma/client';
 import { getLogger } from '@utils/logger';
 
+import {
+    PrismaClientKnownRequestError,
+    PrismaClientUnknownRequestError,
+    PrismaClientValidationError
+} from '@generated-prisma/internal/prismaNamespace';
+
 const logger = getLogger(__filename);
 
 
@@ -51,12 +57,17 @@ export class DBService {
      * @param userId 
      * @returns 
      */
-    public async getAllFiles(userId: string) {
-        return await this.prismaClient.user.findMany({
+    public async getAllFileIds(userId: string) {
+        const userRecord = await this.prismaClient.user.findUnique({
             where: {
                 id: userId
+            },
+            include: {
+                file: true
             }
-        })
+        });
+
+        return userRecord?.file
     }
 
     /**
@@ -65,15 +76,13 @@ export class DBService {
      * @param fileId 
      * @returns 
      */
-    public async getFile(fileId: string) {
-        // const chunks: ChunkModel[] = await this.prismaClient.chunk.findMany({
-        //     where: {
-        //         id: fileId
-        //     }
-        // });
-        
-        
-
+    public async getFile(userId: string,fileId: string) {
+        return await this.prismaClient.file.findUnique({
+            where: {
+                id: fileId,
+                userId: userId
+            }
+        });
     }
 
 
