@@ -21,7 +21,7 @@ export class GetAssets {
             'user-id': '123',
             'content-type': 'application/json'
         };
-
+        
         return this.http.get<FileModelResponse[]>(
             `${this.baseUrl}/filelist`,
             {
@@ -29,6 +29,10 @@ export class GetAssets {
                 responseType: 'json'
             }
         )
+    }
+
+    public static convertFlatListToTree(fileList: FileModelResponse[]) {
+        return buildFileTree(fileList);
     }
 
     public getFile(fileId: string): Observable<Blob> {
@@ -47,3 +51,67 @@ export class GetAssets {
         )
     }
 }
+
+
+export interface FileTreeNode {
+    name: string;
+    file?: FileModelResponse
+    children?: FileTreeNode[];
+    isFile?: boolean;
+}
+
+function buildFileTree(fileList: FileModelResponse[]): FileTreeNode[] {
+    const root: FileTreeNode[] = [];
+    
+    const pathSeparator = '/'; 
+
+    for (const file of fileList) {
+        let currentNodeList = root;
+
+        if (!file.folderPath) {
+            currentNodeList.push({
+                name: file.fileName,
+                file: file,
+                isFile: true
+            });
+            continue;
+        }
+
+        const fullPath = file.folderPath;
+        const segments = fullPath.split(pathSeparator).filter(segment => segment.length > 0);
+        
+
+        if (segments.length === 0) continue;
+      
+        // 2. Iterate through each segment except the last one (which is the file/leaf node)
+        for (let i = 0; i < segments.length; i++) {
+            const segmentName = segments[i];
+            
+            // Try to find an existing node with this name in the current list
+            let node = currentNodeList.find(n => n.name === segmentName);
+    
+            if (!node) {
+            // 3. If the node doesn't exist, create it
+                node = {
+                    name: segmentName,
+                    children: (i < segments.length - 1) ? [] : undefined, // Only folders need a children array initially
+                    isFile: (i === segments.length - 1),
+                    file: (i === segments.length - 1) ? file: undefined
+                };
+                currentNodeList.push(node);
+            }
+    
+            // 4. If it's not the last segment (i.e., it's a folder), move down the tree
+            if (i < segments.length - 1) {
+            // Ensure the children array exists before moving to the next level
+                if (!node.children) {
+                    node.children = [];
+                }
+                currentNodeList = node.children;
+            }
+        }
+    }
+
+    return root; 
+  }
+  

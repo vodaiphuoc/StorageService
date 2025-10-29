@@ -19,7 +19,8 @@ export type ViewAllFileIdHeader = z.infer<typeof ViewAllFileIdHeaderSchema>;
 export const FileModelSchema = z.object({
     'id': z.uuidv4(),
     'fileName': z.string(),
-    'itemType': z.literal(['file', 'folder','image']),
+    'folderPath': z.string().nullable(),
+    'mimeType': z.string(),
     'createAt': z.iso.date()
 });
 

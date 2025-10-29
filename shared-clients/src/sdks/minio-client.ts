@@ -170,8 +170,8 @@ export class MinioService {
      * @returns A Readable stream for the file content.
      */
     public async getObjectStream(objectName: string): Promise<Readable> {
-        console.log(`MinIO: Retrieving stream for ${objectName}`);
         try {
+            console.log(`MinIO: Retrieving stream for ${objectName}`);
             const stream = await this.minioClient.getObject(this.bucketName, objectName);
             return stream;
         } catch (error) {

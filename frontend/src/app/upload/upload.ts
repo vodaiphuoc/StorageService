@@ -53,6 +53,9 @@ export class Upload {
         if (input.files && input.files.length > 0) {
             const result = this.fileCheckService.filesCheck(input.files);
             console.log('result of file checking in folder: ', result);
+            if (result) {
+                this.chunkUploadService.uploadFiles(input.files);
+            }
         }
     }
 

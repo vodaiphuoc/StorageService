@@ -1,41 +1,41 @@
-import { Component, signal, type OnInit, type OnDestroy } from '@angular/core';
+import { Component, signal, type OnInit, inject } from '@angular/core';
 import {MatTableModule} from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 
-import { GetAssets } from './services/get-assets';
+import { GetAssets, type FileTreeNode } from './services/get-assets';
 import { type FileModelResponse } from '@clone-google-drive/commons';
 import { NotificationService } from '@core/services/notification';
 
-import { ViewFolder } from './components/view-folder/view-folder';
-import { ViewFile } from './components/view-file/view-file';
+import {
+    MatDialog
+} from '@angular/material/dialog';
+  
+
+import { ViewFile, type DialogForItem } from './components/view-file/view-file';
 
 @Component({
     selector: 'app-user-assets',
-    imports: [MatTableModule, MatIconModule, ViewFolder, ViewFile],
+    imports: [MatTableModule, MatIconModule],
     templateUrl: './user-assets.html',
     styleUrl: './user-assets.css'
 })
 export class UserAssets implements OnInit {
-    itemList = signal<FileModelResponse[]>([]);
-    displayedColumns: string[] = ['fileName', 'createAt'];
+    itemList = signal<FileTreeNode[]>([]);
+    displayedColumns: string[] = ['fileName','createAt'];
 
-    renderType = signal<"file"|"folder"|"image">("folder");
-
-    safeFileURL: SafeResourceUrl = '';
+    readonly dialog = inject(MatDialog);
 
     constructor(
         private getAssetsService: GetAssets,
-        private notiService: NotificationService,
-        private domSanitizer: DomSanitizer
+        private notiService: NotificationService
     ) { }
     
     ngOnInit() {
-        this.renderType.set("folder");
         this.getAssetsService.getAllFileMetaData()
             .subscribe({
                 next: (results: FileModelResponse[]) => {
-                    this.itemList.update(v => [...v, ...results]);
+                    const fileTree: FileTreeNode[] = GetAssets.convertFlatListToTree(results);
+                    this.itemList.set(fileTree);
                 },
                 error: (err) => {
                     let errorMessage: string;
@@ -54,19 +54,40 @@ export class UserAssets implements OnInit {
         
     }
 
-    onItemSelect(row: FileModelResponse) {
-        console.log(row);
-        this.getAssetsService.getFile(row.id)
-            .subscribe({
-                next: (data: Blob) => {
-                    if (row.itemType === 'file') {
-                        const fileURL = URL.createObjectURL(data);
-                        this.safeFileURL = this.domSanitizer.bypassSecurityTrustResourceUrl(fileURL);
+    /**
+     * Render item by condition
+     *  - if pdf/image: open dialog `ViewFile`
+     *  - if folder: change itemList to childrens of current node
+     * @param row 
+     */
+    onItemSelect(row: FileTreeNode) {
+        console.log('onItemSelect: ',row);
+        if (row.isFile) {
+            console.log('click to show file');
+            const selectedFile = row.file as FileModelResponse;
 
-                    }
-                    
-                }
+            const dialogDataConfig: DialogForItem = {
+                fileId: selectedFile.id,
+                name: selectedFile.fileName,
+                isPdf: selectedFile.mimeType.startsWith('image')? false: true
+            }
+            this.dialog.open(ViewFile, {
+                data: dialogDataConfig,
+                minWidth: '80vw'
             });
+            
+        } else {
+            const currentTree = this.itemList();
+            const retrievalNode = currentTree.find(n => n.name == row.name);
+            
+            if (!retrievalNode) {
+                console.log('error find node');
+            } else {
+                const childrens = retrievalNode.children as FileTreeNode[];
+                this.itemList.set(childrens);
+            }
+        }
+
     }
 
 }

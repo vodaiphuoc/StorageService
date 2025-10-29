@@ -17,7 +17,7 @@ function formatDatetime(inputDate: Date): string {
     const pad = (num: number) => num.toString().padStart(2, '0');
 
     // Concatenate into YYYY-MM-DD format
-    return `${year}-${pad(month)}-${pad(day)}-12`;
+    return `${year}-${pad(month)}-${pad(day)}`;
 }
 
 export const handleGetAllFileId = async (req: Request, res: Response) => {
@@ -29,15 +29,12 @@ export const handleGetAllFileId = async (req: Request, res: Response) => {
 
         if (files) {
             const responseData: FileModelResponse[] = files.map((file: FileModel) => {
-                const itemType: "file"|"folder"|"image" =
-                        file.folderPath ? "folder"
-                        : file.mimeType.startsWith("image") ? "image"
-                        : "file"
                 
-                const repsoneItem = {
+                const repsoneItem: FileModelResponse = {
                     id: file.id,
                     fileName: file.fileName,
-                    itemType: itemType,
+                    folderPath: file.folderPath,
+                    mimeType: file.mimeType,
                     createAt: formatDatetime(file.createdAt)
                 }
                 
@@ -80,7 +77,8 @@ export const handlViewFileContent = async (req: Request, res: Response) => {
 
         if (file) {
             const stream = await minioSevice.getObjectStream(file.id);
-            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Type', file.mimeType.startsWith('image')? file.mimeType:'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="${file.fileName}"`);
             stream.pipe(res);
             return;
 

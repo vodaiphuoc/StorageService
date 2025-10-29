@@ -9,3 +9,4 @@ dev.note.md
 *.yml
 **/generated/prisma/
 migrations/
+testData/
