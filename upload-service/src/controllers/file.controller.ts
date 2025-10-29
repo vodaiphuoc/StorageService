@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as z from "zod";
-import { ViewAllFileIdHeader , ViewFileHeader, FileModelResponse, FileModelSchema } from '@clone-google-drive/commons';
+import { ViewAllFileIdHeader , ViewFileHeader, FileModelResponse, FileModelSchema, ViewFilesIdBody } from '@clone-google-drive/commons';
 import { MinioService } from '@clone-google-drive/shared-clients';
 import { FileModel } from '@generated-prisma/models/File';
 import { DBService } from '@lib/prisma';
@@ -20,6 +20,12 @@ function formatDatetime(inputDate: Date): string {
     return `${year}-${pad(month)}-${pad(day)}`;
 }
 
+/**
+ * Get all files meta data
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 export const handleGetAllFileId = async (req: Request, res: Response) => {
     try {
         const headers: ViewAllFileIdHeader = req.headers as ViewAllFileIdHeader;    
@@ -66,7 +72,67 @@ export const handleGetAllFileId = async (req: Request, res: Response) => {
 
 }
 
+/**
+ * Retrieve meta data of dedicated file-id list
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+export const handleGetFilesId = async (req: Request, res: Response) => {
+    try {
+        const headers: ViewAllFileIdHeader = req.headers as ViewAllFileIdHeader;
+        const body: ViewFilesIdBody = req.body as ViewFilesIdBody;
 
+        const dbService: DBService = DBService.getInstance();
+
+        const files: FileModel[] = await dbService.getFileIds(headers['user-id'], body['file-id-list']);
+
+        if (files) {
+            const responseData: FileModelResponse[] = files.map((file: FileModel) => {
+                
+                const repsoneItem: FileModelResponse = {
+                    id: file.id,
+                    fileName: file.fileName,
+                    folderPath: file.folderPath,
+                    mimeType: file.mimeType,
+                    createAt: formatDatetime(file.createdAt)
+                }
+                
+                return FileModelSchema.parse(repsoneItem);
+            })
+            return res.status(200).json(responseData);
+
+        } else {
+            logger.error(`Undefine files retrieval for user:  ${headers['user-id']}`);
+            return res.status(404).json({ 
+                message: "Cannot get content"
+            });
+        }
+        
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            logger.error(`handleGetFilesId error: ${error}`);
+            return res.status(404).json({ 
+                message: "Cannot get content, internal server error"
+            });
+        } else {
+            logger.error(`handleGetFilesId error: ${error}`);
+            return res.status(500).json({ 
+                message: "Internal server error"
+            });
+        }
+        
+    }
+    
+
+}
+
+/**
+ * Get file content
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 export const handlViewFileContent = async (req: Request, res: Response) => {
     try {
         const headers: ViewFileHeader = req.headers as ViewFileHeader;

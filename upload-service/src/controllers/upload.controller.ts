@@ -130,8 +130,10 @@ export const finalizeUpload = async (req: Request, res: Response) => {
 
         await dbService.updateUploadStatus(requestBody['file-id'], requestHeaders['user-id'], 'SUCCESS');
 
-        res.sendStatus(200);
-        return;
+        return res.status(200).json({
+            successFileId: requestBody['file-id']
+        });
+        
     } catch (error) {
         logger.error(`complete upload field ${error}`);
         await dbService.updateUploadStatus(requestBody['file-id'], requestHeaders['user-id'], 'FAILED');

@@ -70,6 +70,25 @@ export class DBService {
         return userRecord?.file
     }
 
+
+    /**
+     * Get list of new upload files given array of fileId of a user
+     * @param userId 
+     * @param fileIds
+     * @returns 
+     */
+    public async getFileIds(userId: string,fileIds: string[]) {
+        return await this.prismaClient.file.findMany({
+            where: {
+                id: {
+                    in: fileIds
+                },
+                userId: userId,
+            }
+        });
+
+    }
+
     /**
      * Get sepecific file
      * @param userId 

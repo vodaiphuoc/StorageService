@@ -62,8 +62,8 @@ EOF
 cleanup() {
   echo "Runining cleanup ..."
   # The cleanup commands you already have
-  docker container rm -f "$NGROK_CONTAINER" "$FRONTEND_CONTAINER" "$UPLOAD_CONTAINER"
-  docker image rm -f "$FRONTEND_IMAGE" "$UPLOAD_IMAGE"
+  docker container rm -f "$NGROK_CONTAINER" "$FRONTEND_CONTAINER"
+  docker image rm -f "$FRONTEND_IMAGE"
   
   echo "Cleanup complete."
   exit 1

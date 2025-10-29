@@ -36,6 +36,9 @@ export class Dashboard {
         ).addSvgIcon(
             'add-folder-icon',
             this.domSanitizer.bypassSecurityTrustResourceUrl('/assets/add-files/folder.svg')
+        ).addSvgIcon(
+            'node-right-arrow-icon',
+            this.domSanitizer.bypassSecurityTrustResourceUrl('/assets/node-nav/caret-right.svg')
         );
     }
 }

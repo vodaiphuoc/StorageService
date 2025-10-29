@@ -1,14 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Observable, filter, tap, concatMap, catchError, throwError } from 'rxjs';
+import { Observable, filter, tap, concatMap, last, map, of, forkJoin, catchError, throwError } from 'rxjs';
 import type {
     InitUploadHeaders,
     InitUploadBody,
     InitUploadReponse,
     ChunkUploadHeaders,
     ChunkEtag,
-    completeUploadBody
+    completeUploadBody,
+    completeUploadResponse
 } from '@clone-google-drive/commons';
+
+import { NotificationService } from '@core/services/notification';
 
 @Injectable({
     providedIn: 'root'
@@ -18,6 +21,8 @@ export class ChunkUpload {
     private baseUrl: string = "/api/upload";
 
     constructor(private http: HttpClient) { };
+
+    private notiService: NotificationService = inject(NotificationService);
 
     private initUpload(file: File, totalChunks: number): Observable<InitUploadReponse>{
         const headersData: InitUploadHeaders = {
@@ -63,7 +68,7 @@ export class ChunkUpload {
                     "etags": etags
                 }
 
-                return this.http.post(
+                return this.http.post<completeUploadResponse>(
                     `${this.baseUrl}/complete`,
                     completeRequestBody,
                     {
@@ -71,7 +76,7 @@ export class ChunkUpload {
                             'user-id': '123',
                             'content-type': 'application/json'
                         },
-                        responseType: "text"
+                        responseType: "json"
                     }
                 );
             }
@@ -81,8 +86,6 @@ export class ChunkUpload {
 
             // 1. Slice the file to get the current chunk as a Blob
             const chunk = file.slice(start, end, file.type);
-
-            console.log(`chunk ${currentChunk}: ${chunk}`);
 
             // 2. Define headers/parameters for the server
             const headersData: ChunkUploadHeaders = {
@@ -109,32 +112,27 @@ export class ChunkUpload {
                 .pipe(
                     tap(event => {
                         if (event.type === HttpEventType.UploadProgress) {
-                            // 1. PROGRESS HANDLING
+                            
                             const chunkProgress = Math.round(100 * event.loaded / (event.total || 1));
 
-                            // You would typically use another RxJS Subject here 
-                            // to emit the total upload progress to a UI component.
                             console.log(`Chunk ${currentChunk}/${totalChunks} Progress: ${chunkProgress}%`);
                         }
                     }),
                     filter(event => event.type === HttpEventType.Response),
                     tap((responseEtag: HttpResponse<ChunkEtag>) => {
                         console.log(`Chunk ${currentChunk} successfully uploaded.`);
-                        // 2. SUCCESS HANDLING (Chunk complete)
+                        
                         const etag = responseEtag.body as ChunkEtag;
                         currentChunk++;
                         etags.push(etag);
-                        console.log(`Current etags: ${etags}`);
                     }),
-                    // 3. FAILURE HANDLING
+                    
                     catchError((error) => {
                         console.error(`Upload failed for chunk ${currentChunk}:`, error);
-
-                        // Here you can implement retry logic (e.g., attempt to re-upload the same chunk)
-                        // For now, we signal an error and stop the chain
                         return throwError(() => new Error(`Chunk upload failed: ${currentChunk}`));
                     }),
-                    // 4. CONTINUE: Recursively call the next chunk upload only on success
+                
+                    // recursive
                     concatMap(() => uploadNextChunk())
 
                 );
@@ -144,39 +142,61 @@ export class ChunkUpload {
         return uploadNextChunk();
     }
 
+    /**
+     * Upload single file or list of files (for folder)
+     * @param inputFiles 
+     */
     public uploadFiles(inputFiles: FileList) {
-        for (let i = 0; i < inputFiles.length; i++) {
-            const currentFile = inputFiles.item(i) as File;
-            const totalChunks = Math.ceil(currentFile.size / this.chunkSize);
 
-            this.initUpload(currentFile, totalChunks)
-                .pipe(
-                    concatMap((reponse: InitUploadReponse) => {
-                        const fileId = reponse.fileId;
-                        const uploadId = reponse.uploadId;
-                        return this.uploadFileInChunks(
-                            currentFile,
-                            fileId,
-                            uploadId,
-                            totalChunks
-                        );
-                })
-            )
-                .subscribe({
-                    next: (result) => {
-                        // This 'next' fires for every successful chunk response due to the concatMap structure,
-                        // or when the entire chain completes (depending on how concatMap is terminated).
-                        console.log('Upload in progress:', result);
-                    },
-                    error: (err) => {
-                        console.error('Upload failed:', err);
-                    },
-                    complete: () => {
-                        console.log('File upload completed successfully!');
-                    }
-            })
+        const uploadObservables: Observable<string>[] = Array.from(inputFiles)
+            .map((currentFile: File) => {
+                const totalChunks = Math.ceil(currentFile.size / this.chunkSize);
 
-        }
+                return this.initUpload(currentFile, totalChunks)
+                    .pipe(
+                        concatMap((response: InitUploadReponse) => {
+                            const { fileId, uploadId } = response;
+                            return this.uploadFileInChunks(
+                                currentFile,
+                                fileId,
+                                uploadId,
+                                totalChunks
+                            )
+                                .pipe(
+                                    last(null, (result: completeUploadResponse) => result.successFileId),
+                                    map(result => {
+                                        console.log(`File upload completed successfully: ${currentFile.name}`);
+                                        return result.successFileId;
+                                    }),
+                                    catchError(err => {
+                                        console.error(`Upload failed for ${currentFile.name}:`, err);
+                                        // Return an Observable of null to prevent forkJoin from failing
+                                        return of(null as any);
+                                    })
+                                );
+                        })
+                    );
+            });
+
+        
+        forkJoin(uploadObservables)
+        .subscribe((allResults: (string | null)[]) => {
+            // Filter out nulls (failed uploads) to get only successful IDs
+            const successFileIds: string[] = allResults.filter((id): id is string => !!id);
+
+            console.log(`All file processes finished. Successful count: ${successFileIds.length}`);
+            
+            if (successFileIds.length > 0) {
+                console.log(`notiService push: payload: ${successFileIds}, payload length: ${successFileIds.length}`);
+                this.notiService.uploadSuccess(
+                    'Upload Process',
+                    'Upload success',
+                    5,
+                    successFileIds
+                );
+            }
+        });
+        
     }
 
 

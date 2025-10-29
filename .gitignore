@@ -10,3 +10,4 @@ dev.note.md
 **/generated/prisma/
 migrations/
 testData/
+testData (copy)/

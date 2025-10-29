@@ -26,6 +26,12 @@ export const FileModelSchema = z.object({
 
 export type FileModelResponse = z.infer<typeof FileModelSchema>;
 
+export const ViewFilesIdBodySchema = z.object({
+    'file-id-list': z.array(z.string())
+});
+
+export type ViewFilesIdBody = z.infer<typeof ViewFilesIdBodySchema>;
+
 /**
  * Schema for header in view file request
  * on backend

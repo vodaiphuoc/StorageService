@@ -1,10 +1,11 @@
-import { Component, signal, type OnInit, inject } from '@angular/core';
+import { Component, signal, type OnInit, type OnDestroy, inject } from '@angular/core';
 import {MatTableModule} from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 
-import { GetAssets, type FileTreeNode } from './services/get-assets';
+import { GetAssets, type FileTreeNode, findNodeByName } from './services/get-assets';
 import { type FileModelResponse } from '@clone-google-drive/commons';
 import { NotificationService } from '@core/services/notification';
+import type { NotificationModel } from '@core/models/notifications';
 
 import {
     MatDialog
@@ -13,17 +14,28 @@ import {
 
 import { ViewFile, type DialogForItem } from './components/view-file/view-file';
 
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+
 @Component({
     selector: 'app-user-assets',
     imports: [MatTableModule, MatIconModule],
     templateUrl: './user-assets.html',
     styleUrl: './user-assets.css'
 })
-export class UserAssets implements OnInit {
-    itemList = signal<FileTreeNode[]>([]);
+export class UserAssets implements OnInit, OnDestroy {
+    fullItemList = signal<FileTreeNode[]>([]);
+    viewItemList = signal<FileTreeNode[]>([]);
+
+    nodeListNav = signal<string[]>(['Your Drive','Node 1']);
+
+    // for table
     displayedColumns: string[] = ['fileName','createAt'];
 
     readonly dialog = inject(MatDialog);
+    
+    private destroy$ = new Subject<void>();
 
     constructor(
         private getAssetsService: GetAssets,
@@ -31,11 +43,34 @@ export class UserAssets implements OnInit {
     ) { }
     
     ngOnInit() {
+        this.notiService.notification$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((notification: NotificationModel) => {
+                if (notification.source === 'Upload Process') {
+                    const fileIds = notification.payload as string[];
+                    this.getAssetsService.getFilesMetaData(fileIds)
+                        .subscribe({
+                            next: (results: FileModelResponse[]) => {
+                                
+                                const fileTree: FileTreeNode[] = GetAssets.convertFlatListToTree(results);
+                                this.fullItemList.update(v => [...v, ...fileTree]);
+
+                                const currentNodeListNav = this.nodeListNav();
+                                if (currentNodeListNav.at(-1) === 'Your Drive') {
+                                    this.viewItemList.set(this.fullItemList());
+                                }
+                            }
+                        });
+                }
+        });
+
+        // initial load all file meta data
         this.getAssetsService.getAllFileMetaData()
             .subscribe({
                 next: (results: FileModelResponse[]) => {
                     const fileTree: FileTreeNode[] = GetAssets.convertFlatListToTree(results);
-                    this.itemList.set(fileTree);
+                    this.fullItemList.set(fileTree);
+                    this.viewItemList.set(fileTree);
                 },
                 error: (err) => {
                     let errorMessage: string;
@@ -61,7 +96,6 @@ export class UserAssets implements OnInit {
      * @param row 
      */
     onItemSelect(row: FileTreeNode) {
-        console.log('onItemSelect: ',row);
         if (row.isFile) {
             console.log('click to show file');
             const selectedFile = row.file as FileModelResponse;
@@ -77,17 +111,48 @@ export class UserAssets implements OnInit {
             });
             
         } else {
-            const currentTree = this.itemList();
-            const retrievalNode = currentTree.find(n => n.name == row.name);
-            
-            if (!retrievalNode) {
-                console.log('error find node');
-            } else {
-                const childrens = retrievalNode.children as FileTreeNode[];
-                this.itemList.set(childrens);
-            }
+            this.navigateByNodeName(row.name);
         }
 
     }
 
+    onNodeNavClick(event: Event, nodeName: string) {
+        console.log(event, nodeName);
+        if (nodeName === 'Your Drive') {
+            this.viewItemList.set(this.fullItemList());
+            this.nodeListNav.set(['Your Drive']);
+        } else {
+            this.navigateByNodeName(nodeName);
+        }
+        
+    }
+
+    private navigateByNodeName(nodeName: string) {
+        const currentTree = this.fullItemList();
+        const retrievalNode = findNodeByName(currentTree, nodeName);
+        
+        if (!retrievalNode) {
+            console.log('error find node');
+        } else {
+            const childrens = retrievalNode.children as FileTreeNode[];
+            this.viewItemList.set(childrens);
+            this.updateNodeListNav(nodeName);
+            
+        }
+    }
+
+    private updateNodeListNav(nodeName: string) {
+        this.nodeListNav.update((nodeList: string[]) => {
+            if (nodeList.includes(nodeName)) {
+                return nodeList.filter((ele, index) => index <= nodeList.indexOf(nodeName));
+            } else {
+                return [...nodeList, nodeName];
+            } 
+        });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 }

@@ -1,9 +1,10 @@
-<h2 mat-dialog-title>data.name</h2>
 <mat-dialog-content>
     @if (isLoading()) {
+        <div>Loading your file ...</div>
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     } @else {
         @if (data.isPdf) {
+            <h2 mat-dialog-title>data.name</h2>
             <iframe 
                 [src]="safeUrl" 
                 type="application/pdf" 

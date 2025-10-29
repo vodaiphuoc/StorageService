@@ -1,17 +1,26 @@
 import * as express from 'express';
 import {
     handleGetAllFileId,
-    handlViewFileContent
+    handlViewFileContent,
+    handleGetFilesId
 } from '@controllers/file.controller';
 
 import {
     verifyViewAllFileIdHeader,
-    verifyViewFileHeader
+    verifyViewFileHeader,
+    verifyViewFileIdBody
 } from '@middlewares/file.middleware';
 
 const fileRouter = express.Router();
 
-fileRouter.get('/filelist', verifyViewAllFileIdHeader, handleGetAllFileId);
-fileRouter.get('/fileview', verifyViewFileHeader, handlViewFileContent);
+fileRouter.get('/allFileMeta', verifyViewAllFileIdHeader, handleGetAllFileId);
+fileRouter.post(
+    '/filesMeta',
+    express.json(),
+    verifyViewAllFileIdHeader,
+    verifyViewFileIdBody,
+    handleGetFilesId
+);
+fileRouter.get('/fileView', verifyViewFileHeader, handlViewFileContent);
 
 export default fileRouter;

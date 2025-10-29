@@ -41,7 +41,7 @@ export type InitUploadBody = z.infer<typeof InitUploadBodySchema>;
 export interface InitUploadReponse {
     fileId: string,
     uploadId: string
-}
+};
 
 /**
  * Schema for validation custom headers sent with each **chunk upload** request
@@ -73,7 +73,7 @@ export type ChunkUploadHeaders = z.infer<typeof ChunkUploadHeadersSchema>;
 export const chunkEtagSchema = z.object({
     'part': z.number(),
     'etag': z.string()
-})
+});
 export type ChunkEtag = z.infer<typeof chunkEtagSchema>;
 
 /**
@@ -92,6 +92,16 @@ export const completeUploadBodySchema = z.object({
     'file-id': z.uuidv4(),
     'upload-id': z.string(),
     'etags': z.array(chunkEtagSchema)
-})
+});
 
 export type completeUploadBody = z.infer<typeof completeUploadBodySchema>;
+
+/**
+ * Schema and type for complete upload reponse
+ * 
+ */
+export const completeUploadResponseSchema = z.object({
+    successFileId: z.uuidv4()
+});
+
+export type completeUploadResponse = z.infer<typeof completeUploadResponseSchema>;

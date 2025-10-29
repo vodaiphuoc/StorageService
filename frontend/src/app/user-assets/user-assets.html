@@ -1,4 +1,17 @@
-<table mat-table [dataSource]="itemList()" class="mat-elevation-z8 item-table">
+<div class="w-full h-[10vh] flex flex-wrap">
+    @for (node of nodeListNav(); track node) {
+        @if (node !== "Your Drive") {
+            <div class="h-full content-center">
+                <mat-icon svgIcon="node-right-arrow-icon"></mat-icon>
+            </div>
+            
+        }
+        <button (click)="onNodeNavClick($event, node)" class="h-full p-3 rounded-lg bg-gray-200 hover:scale-105">
+            {{ node }}
+        </button>
+    }
+</div>
+<table mat-table [dataSource]="viewItemList()" class="mat-elevation-z8 item-table">
     
     <!-- name Column -->
     <ng-container matColumnDef="fileName">

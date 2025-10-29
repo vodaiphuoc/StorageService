@@ -24,4 +24,9 @@ export class NotificationService {
     error(source: string, message: string, duration: number): void {
         this.notify({ type: 'error', source, message, duration });
     }
+
+    uploadSuccess(source: string, message: string, duration: number, payload?: string[]): void {
+        this.notify({ type: 'success', source, message, duration , payload});
+    }
+
 }

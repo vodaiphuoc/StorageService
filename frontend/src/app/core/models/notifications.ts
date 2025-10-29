@@ -3,4 +3,5 @@ export interface NotificationModel {
     source: string;
     message: string;
     duration: number; //in second
+    payload?: string[]
 }

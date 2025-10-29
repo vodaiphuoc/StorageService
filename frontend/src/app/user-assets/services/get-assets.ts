@@ -5,7 +5,8 @@ import { Observable, filter, tap, concatMap, catchError, throwError } from 'rxjs
 import {
     type ViewAllFileIdHeader,
     type FileModelResponse,
-    type ViewFileHeader
+    type ViewFileHeader,
+    type ViewFilesIdBody
 } from '@clone-google-drive/commons';
 
 @Injectable({
@@ -16,6 +17,10 @@ export class GetAssets {
 
     constructor(private http: HttpClient) {}
 
+    /**
+     * Get all file meta data belong to the user
+     * @returns 
+     */
     public getAllFileMetaData(): Observable<FileModelResponse[]> {
         const headersData: ViewAllFileIdHeader = {
             'user-id': '123',
@@ -23,7 +28,31 @@ export class GetAssets {
         };
         
         return this.http.get<FileModelResponse[]>(
-            `${this.baseUrl}/filelist`,
+            `${this.baseUrl}/allFileMeta`,
+            {
+                headers: headersData,
+                responseType: 'json'
+            }
+        )
+    }
+
+    /**
+     * Get files meta data belong to the user
+     * @returns 
+     */
+    public getFilesMetaData(fileIds: string[]): Observable<FileModelResponse[]> {
+        const headersData: ViewAllFileIdHeader = {
+            'user-id': '123',
+            'content-type': 'application/json'
+        };
+        
+        const requestBody: ViewFilesIdBody = {
+            'file-id-list': fileIds
+        }
+
+        return this.http.post<FileModelResponse[]>(
+            `${this.baseUrl}/filesMeta`,
+            requestBody,
             {
                 headers: headersData,
                 responseType: 'json'
@@ -35,6 +64,11 @@ export class GetAssets {
         return buildFileTree(fileList);
     }
 
+    /**
+     * Get data of a file
+     * @param fileId 
+     * @returns 
+     */
     public getFile(fileId: string): Observable<Blob> {
         const headersData: ViewFileHeader = {
             'user-id': '123',
@@ -43,7 +77,7 @@ export class GetAssets {
         };
 
         return this.http.get(
-            `${this.baseUrl}/fileview`,
+            `${this.baseUrl}/fileView`,
             {
                 headers: headersData,
                 responseType: 'blob'
@@ -113,5 +147,15 @@ function buildFileTree(fileList: FileModelResponse[]): FileTreeNode[] {
     }
 
     return root; 
-  }
+}
   
+export function findNodeByName(nodes: FileTreeNode[], name: string): FileTreeNode | undefined {
+    for (const node of nodes) {
+        if (node.name === name) return node;
+        if (node.children) {
+            const found = findNodeByName(node.children, name);
+            if (found) return found;
+        }
+    }
+    return undefined;
+  }
